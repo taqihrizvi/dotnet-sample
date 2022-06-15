@@ -11,25 +11,58 @@ pool:
 
 variables:
   solution: '**/*.sln'
+  WebProject: 'SampleWebApplication'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
+  runtime: 'win-x64'
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
+  displayName: RestoreWebApiProject
   inputs:
-    restoreSolution: '$(solution)'
+    command: restore
+    projects: '**/$(WebProject).csproj'
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:PackageLocation="$(build.artifactStagingDirectory)"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
 
-- task: VSTest@2
+
+- task: DotNetCoreCLI@2
+  displayName: BuildWebAPIProject
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    projects: '**/$(WebProject).csproj'
+    arguments: '--no-restore'
+
+-
+
+
+- task: DotNetCoreCLI@2
+  displayName: 'Publish WebApi'
+  inputs:
+    command: publish
+    publishWebProjects: false
+    projects: '**/$(WebProject).csproj'
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory) --runtime -r $(runtime)'
+
+
+- task: CopyFiles@2
+  inputs:
+    Contents: '**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '5.x'
+
+- task: DotNetCoreCLI@2
+  displayName: Install dotnet-ef
+  inputs:
+    command: 'custom'
+    custom: 'tool'
+    arguments: 'install --global dotnet-ef --version 5.0.10 --ignore-failed-sources'
+
+- task: CmdLine@2
+  inputs:
+    script: dotnet ef migrations script -o $(Build.ArtifactStagingDirectory)\migrations\script.sql --idempotent --project $(Build.SourcesDirectory)\SampleWebApplication\SampleWebApplication.csproj
+
 - task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
