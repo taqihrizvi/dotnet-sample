@@ -11,10 +11,6 @@ pool:
 
 variables:
 - group: New variable group 24-Aug'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-  runtime: 'win-x64'
-
 steps:
 - task: DotNetCoreCLI@2
   displayName: RestoreWebApiProject
