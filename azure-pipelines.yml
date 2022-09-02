@@ -10,8 +10,7 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  solution: '**/*.sln'
-  WebProject: 'SampleWebApplication'
+- group: New variable group 24-Aug'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   runtime: 'win-x64'
