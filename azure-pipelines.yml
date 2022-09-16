@@ -8,9 +8,6 @@ trigger:
 
 pool:
   vmImage: 'windows-latest'
-
-variables:
-- group: New variable group 24-Aug'
 steps:
 - task: DotNetCoreCLI@2
   displayName: RestoreWebApiProject
